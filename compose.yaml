@@ -1,0 +1,6 @@
+﻿services:
+  myparademanager.webapp:
+    image: myparademanager.webapp
+    build:
+      context: .
+      dockerfile: MyParadeManager.WebApp/Dockerfile
