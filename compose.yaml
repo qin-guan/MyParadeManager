@@ -4,3 +4,9 @@
     build:
       context: .
       dockerfile: MyParadeManager.WebApp/Dockerfile
+
+  myparademanager.razortest:
+    image: myparademanager.razortest
+    build:
+      context: .
+      dockerfile: MyParadeManager.RazorTest/Dockerfile
