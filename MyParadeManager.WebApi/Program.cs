@@ -1,35 +1,53 @@
-using System.Text.Json.Serialization;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Services;
+using Google.Apis.Sheets.v4;
+using Microsoft.Extensions.Options;
+using MyParadeManager.WebApi.BackgroundServices;
+using MyParadeManager.WebApi.GoogleSheets;
+using MyParadeManager.WebApi.GoogleSheets.ValueConverter;
+using MyParadeManager.WebApi.Options;
+using ZiggyCreatures.Caching.Fusion;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
-builder.Services.ConfigureHttpJsonOptions(options =>
+builder.AddServiceDefaults();
+
+ValueConverterRegistry.RegisterConverter(new UserTypeValueConverter());
+
+builder.Services.AddOptions<TelegramOptions>()
+    .Bind(builder.Configuration.GetSection("Telegram"));
+
+builder.Services.AddOptions<GoogleOptions>()
+    .Bind(builder.Configuration.GetSection("Google"));
+
+builder.Services.AddSingleton(sp =>
 {
-    options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
+    var options = sp.GetRequiredService<IOptions<GoogleOptions>>();
+
+    var credential = GoogleCredential.FromJson(options.Value.ServiceAccountCredentials);
+    var service = new SheetsService(new BaseClientService.Initializer
+    {
+        HttpClientInitializer = credential
+    });
+
+    return service;
 });
+
+builder.Services.AddSingleton(sp =>
+{
+    var options = sp.GetRequiredService<IOptions<GoogleOptions>>();
+
+    return new GoogleSheetsConfiguration
+    {
+        DefaultSheetId = options.Value.SpreadsheetId
+    };
+});
+
+builder.Services.AddScoped<IGoogleSheetsContext, GoogleSheetsContext>();
+builder.Services.AddHostedService<Bot>();
+
+builder.Services.AddFusionCache().AsHybridCache();
 
 var app = builder.Build();
 
-var sampleTodos = new Todo[]
-{
-    new(1, "Walk the dog"),
-    new(2, "Do the dishes", DateOnly.FromDateTime(DateTime.Now)),
-    new(3, "Do the laundry", DateOnly.FromDateTime(DateTime.Now.AddDays(1))),
-    new(4, "Clean the bathroom"),
-    new(5, "Clean the car", DateOnly.FromDateTime(DateTime.Now.AddDays(2)))
-};
-
-var todosApi = app.MapGroup("/todos");
-todosApi.MapGet("/", () => sampleTodos);
-todosApi.MapGet("/{id}", (int id) =>
-    sampleTodos.FirstOrDefault(a => a.Id == id) is { } todo
-        ? Results.Ok(todo)
-        : Results.NotFound());
-
 app.Run();
-
-public record Todo(int Id, string? Title, DateOnly? DueBy = null, bool IsComplete = false);
-
-[JsonSerializable(typeof(Todo[]))]
-internal partial class AppJsonSerializerContext : JsonSerializerContext
-{
-}

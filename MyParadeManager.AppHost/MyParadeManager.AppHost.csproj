@@ -12,7 +12,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Aspire.Hosting.AppHost" Version="9.2.1" />
+        <PackageReference Include="Aspire.Hosting.AppHost" Version="9.3.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\MyParadeManager.WebApi\MyParadeManager.WebApi.csproj" />
     </ItemGroup>
 
 </Project>
