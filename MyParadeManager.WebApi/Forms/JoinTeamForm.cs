@@ -64,4 +64,22 @@ public class JoinTeamForm(IServiceProvider sp) : FormBase
             await Device.Send($"Enter your invite code to join a team:", form);
         }
     }
+
+    public override async Task Action(MessageResult message)
+    {
+        var data = message.GetData<CallbackData>();
+        if (data is null)
+        {
+            return;
+        }
+
+        switch (data.Value)
+        {
+            case "back":
+            {
+                await this.NavigateTo<StartForm>();
+                break;
+            }
+        }
+    }
 }
