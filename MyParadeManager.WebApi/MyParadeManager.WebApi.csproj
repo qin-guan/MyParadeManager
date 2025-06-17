@@ -17,8 +17,8 @@
 
     <ItemGroup>
         <PackageReference Include="Google.Apis.Sheets.v4" Version="1.69.0.3785"/>
-        <PackageReference Include="TelegramBotBase" Version="7.0.0-preview.11"/>
-        <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.2.0"/>
+        <PackageReference Include="TelegramBotBase" Version="7.0.0-preview.13" />
+        <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.3.0" />
     </ItemGroup>
 
     <ItemGroup>

@@ -12,7 +12,7 @@ var builder = WebApplication.CreateSlimBuilder(args);
 
 builder.AddServiceDefaults();
 
-ValueConverterRegistry.RegisterConverter(new UserTypeValueConverter());
+ValueConverterRegistry.RegisterConverter(new UserTeamRoleConverter());
 
 builder.Services.AddOptions<TelegramOptions>()
     .Bind(builder.Configuration.GetSection("Telegram"));

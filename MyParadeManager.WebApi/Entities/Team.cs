@@ -8,7 +8,7 @@ public class Team
 {
     [Key]
     [Column(Name = "ID", ColumnLetter = "A")]
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     [Column(Name = "Name", ColumnLetter = "B")]
     public string? Name { get; set; }
@@ -18,7 +18,4 @@ public class Team
 
     [Column(Name = "SpreadsheetId", ColumnLetter = "D")]
     public string? SpreadsheetId { get; set; }
-
-    [Column(Name = "OwnerId", ColumnLetter = "AAA")]
-    public long? OwnerId { get; set; }
 }
