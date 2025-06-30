@@ -1,4 +1,5 @@
 using MyParadeManager.WebApi.Entities;
+using MyParadeManager.WebApi.Entities.Shared;
 using MyParadeManager.WebApi.GoogleSheets;
 using TelegramBotBase.Base;
 using TelegramBotBase.DependencyInjection;
@@ -15,16 +16,16 @@ public class StartForm : AutoCleanForm
     {
         DeleteMode = EDeleteMode.OnLeavingForm;
         _serviceProvider = serviceProvider;
+
+        Init += async (sender, args) => { await Device.Send("Welcome to My Parade Manager!"); };
     }
 
     public override async Task Load(MessageResult message)
     {
-        await Device.Send("Welcome to My Parade Manager!");
-        
         await using var scope = _serviceProvider.CreateAsyncScope();
-        var userRepository = scope.ServiceProvider.GetRequiredService<IGoogleSheetsContext>();
+        var ctx = scope.ServiceProvider.GetRequiredService<IGoogleSheetsContext>();
 
-        var user = await userRepository.GetUserByKeyAsync(message.DeviceId);
+        var user = await ctx.GetUserByKeyAsync(message.DeviceId);
 
         if (user is null)
         {
@@ -36,7 +37,7 @@ public class StartForm : AutoCleanForm
                               """);
 
             // Skip render
-            await this.NavigateTo<JoinTeamForm>();
+            await this.NavigateTo<JoinUnitForm>();
         }
     }
 
@@ -62,23 +63,23 @@ public class StartForm : AutoCleanForm
             return;
         }
 
-        message.Handled = true;      
-        
+        message.Handled = true;
+
         switch (call.Value)
         {
             case "my-teams":
             {
-                await this.NavigateTo<ListTeamsForm>();
+                await this.NavigateTo<ListUnitsForm>();
                 break;
             }
             case "create-team":
             {
-                await this.NavigateTo<CreateTeamForm>();
+                await this.NavigateTo<CreateUnitForm>();
                 break;
             }
             case "join-team":
             {
-                await this.NavigateTo<JoinTeamForm>();
+                await this.NavigateTo<JoinUnitForm>();
                 break;
             }
         }

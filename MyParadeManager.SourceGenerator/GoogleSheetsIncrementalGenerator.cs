@@ -193,7 +193,8 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
         sb.AppendLine("using System.Threading.Tasks;");
         sb.AppendLine("using Google.Apis.Sheets.v4;");
         sb.AppendLine("using Google.Apis.Sheets.v4.Data;");
-        sb.AppendLine("using MyParadeManager.WebApi.Entities;");
+        sb.AppendLine("using MyParadeManager.WebApi.Entities.Shared;");
+        sb.AppendLine("using MyParadeManager.WebApi.Entities.Tenant;");
         sb.AppendLine("using MyParadeManager.WebApi.GoogleSheets.EntityOperations;");
         sb.AppendLine();
         sb.AppendLine("namespace MyParadeManager.WebApi.GoogleSheets;");
@@ -201,15 +202,23 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
         sb.AppendLine("public partial class GoogleSheetsContext");
         sb.AppendLine("{");
 
+        // Generic methods with optional configuration function
         sb.AppendLine(
             "    public async Task<IEnumerable<T>> GetAsync<T>(CancellationToken cancellationToken = default) where T : class, new()");
+        sb.AppendLine("    {");
+        sb.AppendLine("        return await GetAsync<T>(_ => _, cancellationToken);");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+
+        sb.AppendLine(
+            "    public async Task<IEnumerable<T>> GetAsync<T>(Func<GoogleSheetsConfiguration, GoogleSheetsConfiguration> configurationFunc, CancellationToken cancellationToken = default) where T : class, new()");
         sb.AppendLine("    {");
         sb.AppendLine("        return typeof(T).Name switch");
         sb.AppendLine("        {");
         foreach (var entity in entities)
         {
             sb.AppendLine(
-                $"            \"{entity.ClassName}\" => (IEnumerable<T>)await GetAsync{entity.ClassName}Internal(cancellationToken),");
+                $"            \"{entity.ClassName}\" => (IEnumerable<T>)await GetAsync{entity.ClassName}Internal(configurationFunc, cancellationToken),");
         }
 
         sb.AppendLine(
@@ -221,12 +230,19 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
         sb.AppendLine(
             "    public async Task<T?> GetByKeyAsync<T>(object key, CancellationToken cancellationToken = default) where T : class, new()");
         sb.AppendLine("    {");
+        sb.AppendLine("        return await GetByKeyAsync<T>(key, _ => _, cancellationToken);");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+
+        sb.AppendLine(
+            "    public async Task<T?> GetByKeyAsync<T>(object key, Func<GoogleSheetsConfiguration, GoogleSheetsConfiguration> configurationFunc, CancellationToken cancellationToken = default) where T : class, new()");
+        sb.AppendLine("    {");
         sb.AppendLine("        return typeof(T).Name switch");
         sb.AppendLine("        {");
         foreach (var entity in entities)
         {
             sb.AppendLine(
-                $"            \"{entity.ClassName}\" => (T?)(object?)await GetByKeyAsync{entity.ClassName}Internal(key, cancellationToken),");
+                $"            \"{entity.ClassName}\" => (T?)(object?)await GetByKeyAsync{entity.ClassName}Internal(key, configurationFunc, cancellationToken),");
         }
 
         sb.AppendLine(
@@ -238,12 +254,19 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
         sb.AppendLine(
             "    public Task<T> AddAsync<T>(T entity, CancellationToken cancellationToken = default) where T : class, new()");
         sb.AppendLine("    {");
+        sb.AppendLine("        return AddAsync(entity, _ => _, cancellationToken);");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+
+        sb.AppendLine(
+            "    public Task<T> AddAsync<T>(T entity, Func<GoogleSheetsConfiguration, GoogleSheetsConfiguration> configurationFunc, CancellationToken cancellationToken = default) where T : class, new()");
+        sb.AppendLine("    {");
         sb.AppendLine("        return entity switch");
         sb.AppendLine("        {");
         foreach (var entity in entities)
         {
             sb.AppendLine(
-                $"            {entity.ClassName} {entity.ClassName.ToLowerInvariant()}Entity => (Task<T>)(object)AddAsync{entity.ClassName}Internal({entity.ClassName.ToLowerInvariant()}Entity, cancellationToken),");
+                $"            {entity.ClassName} {entity.ClassName.ToLowerInvariant()}Entity => (Task<T>)(object)AddAsync{entity.ClassName}Internal({entity.ClassName.ToLowerInvariant()}Entity, configurationFunc, cancellationToken),");
         }
 
         sb.AppendLine(
@@ -255,12 +278,19 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
         sb.AppendLine(
             "    public Task<T> UpdateAsync<T>(T entity, CancellationToken cancellationToken = default) where T : class, new()");
         sb.AppendLine("    {");
+        sb.AppendLine("        return UpdateAsync(entity, _ => _, cancellationToken);");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+
+        sb.AppendLine(
+            "    public Task<T> UpdateAsync<T>(T entity, Func<GoogleSheetsConfiguration, GoogleSheetsConfiguration> configurationFunc, CancellationToken cancellationToken = default) where T : class, new()");
+        sb.AppendLine("    {");
         sb.AppendLine("        return entity switch");
         sb.AppendLine("        {");
         foreach (var entity in entities)
         {
             sb.AppendLine(
-                $"            {entity.ClassName} {entity.ClassName.ToLowerInvariant()}Entity => (Task<T>)(object)UpdateAsync{entity.ClassName}Internal({entity.ClassName.ToLowerInvariant()}Entity, cancellationToken),");
+                $"            {entity.ClassName} {entity.ClassName.ToLowerInvariant()}Entity => (Task<T>)(object)UpdateAsync{entity.ClassName}Internal({entity.ClassName.ToLowerInvariant()}Entity, configurationFunc, cancellationToken),");
         }
 
         sb.AppendLine(
@@ -272,12 +302,19 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
         sb.AppendLine(
             "    public Task DeleteAsync<T>(T entity, CancellationToken cancellationToken = default) where T : class, new()");
         sb.AppendLine("    {");
+        sb.AppendLine("        return DeleteAsync(entity, _ => _, cancellationToken);");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+
+        sb.AppendLine(
+            "    public Task DeleteAsync<T>(T entity, Func<GoogleSheetsConfiguration, GoogleSheetsConfiguration> configurationFunc, CancellationToken cancellationToken = default) where T : class, new()");
+        sb.AppendLine("    {");
         sb.AppendLine("        return entity switch");
         sb.AppendLine("        {");
         foreach (var entity in entities)
         {
             sb.AppendLine(
-                $"            {entity.ClassName} {entity.ClassName.ToLowerInvariant()}Entity => DeleteAsync{entity.ClassName}Internal({entity.ClassName.ToLowerInvariant()}Entity, cancellationToken),");
+                $"            {entity.ClassName} {entity.ClassName.ToLowerInvariant()}Entity => DeleteAsync{entity.ClassName}Internal({entity.ClassName.ToLowerInvariant()}Entity, configurationFunc, cancellationToken),");
         }
 
         sb.AppendLine(
@@ -301,14 +338,17 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
         var maxColumnIndex = CalculateMaxColumnIndex(entity.Properties);
         var maxColumnLetter = maxColumnIndex >= 0 ? IndexToColumnLetter(maxColumnIndex) : "Z";
 
-        // GetAsync method with CancellationToken
+        // GetAsync method with configuration function
         sb.AppendLine(
-            $"    private async Task<IEnumerable<{entity.ClassName}>> GetAsync{entity.ClassName}Internal(CancellationToken cancellationToken = default)");
+            $"    private async Task<IEnumerable<{entity.ClassName}>> GetAsync{entity.ClassName}Internal(Func<GoogleSheetsConfiguration, GoogleSheetsConfiguration> configurationFunc, CancellationToken cancellationToken = default)");
         sb.AppendLine("    {");
         sb.AppendLine("        cancellationToken.ThrowIfCancellationRequested();");
         sb.AppendLine();
+        sb.AppendLine("        // Apply the configuration function to get the effective configuration");
+        sb.AppendLine("        var effectiveConfig = configurationFunc(_configuration);");
+        sb.AppendLine();
         sb.AppendLine(
-            $"        var sheetId = {(string.IsNullOrEmpty(entity.SheetId) ? "_configuration.DefaultSheetId" : $"\"{entity.SheetId}\"")};");
+            $"        var sheetId = {(string.IsNullOrEmpty(entity.SheetId) ? "effectiveConfig.DefaultSheetId" : $"\"{entity.SheetId}\"")};");
 
         var sheetReference = !string.IsNullOrEmpty(entity.SheetName) ? $"{entity.SheetName}!" : "";
 
@@ -326,15 +366,16 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
         sb.AppendLine("    }");
         sb.AppendLine();
 
-        // GetByKeyAsync method with CancellationToken
+        // GetByKeyAsync method with configuration function
         if (keyProperty != null)
         {
             sb.AppendLine(
-                $"    private async Task<{entity.ClassName}?> GetByKeyAsync{entity.ClassName}Internal(object key, CancellationToken cancellationToken = default)");
+                $"    private async Task<{entity.ClassName}?> GetByKeyAsync{entity.ClassName}Internal(object key, Func<GoogleSheetsConfiguration, GoogleSheetsConfiguration> configurationFunc, CancellationToken cancellationToken = default)");
             sb.AppendLine("    {");
             sb.AppendLine("        cancellationToken.ThrowIfCancellationRequested();");
             sb.AppendLine();
-            sb.AppendLine($"        var entities = await GetAsync{entity.ClassName}Internal(cancellationToken);");
+            sb.AppendLine(
+                $"        var entities = await GetAsync{entity.ClassName}Internal(configurationFunc, cancellationToken);");
             sb.AppendLine(
                 $"        return entities.FirstOrDefault(e => e.{keyProperty.Name}{(keyProperty.IsNullable ? '?' : string.Empty)}.ToString() == key.ToString());");
             sb.AppendLine("    }");
@@ -343,7 +384,7 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
         else
         {
             sb.AppendLine(
-                $"    private Task<{entity.ClassName}?> GetByKeyAsync{entity.ClassName}Internal(object key, CancellationToken cancellationToken = default)");
+                $"    private Task<{entity.ClassName}?> GetByKeyAsync{entity.ClassName}Internal(object key, Func<GoogleSheetsConfiguration, GoogleSheetsConfiguration> configurationFunc, CancellationToken cancellationToken = default)");
             sb.AppendLine("    {");
             sb.AppendLine("        cancellationToken.ThrowIfCancellationRequested();");
             sb.AppendLine(
@@ -352,11 +393,14 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
             sb.AppendLine();
         }
 
-        // AddAsync method with proper StartRow handling
+        // AddAsync method with configuration function
         sb.AppendLine(
-            $"    private Task<{entity.ClassName}> AddAsync{entity.ClassName}Internal({entity.ClassName} entity, CancellationToken cancellationToken = default)");
+            $"    private Task<{entity.ClassName}> AddAsync{entity.ClassName}Internal({entity.ClassName} entity, Func<GoogleSheetsConfiguration, GoogleSheetsConfiguration> configurationFunc, CancellationToken cancellationToken = default)");
         sb.AppendLine("    {");
         sb.AppendLine("        cancellationToken.ThrowIfCancellationRequested();");
+        sb.AppendLine();
+        sb.AppendLine("        // Apply the configuration function to get the effective configuration");
+        sb.AppendLine("        var effectiveConfig = configurationFunc(_configuration);");
         sb.AppendLine();
 
         var requiredProperties = entity.Properties.Where(p => !p.IsNullable).ToList();
@@ -382,7 +426,7 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
         }
 
         sb.AppendLine(
-            $"        var sheetId = {(string.IsNullOrEmpty(entity.SheetId) ? "_configuration.DefaultSheetId" : $"\"{entity.SheetId}\"")};");
+            $"        var sheetId = {(string.IsNullOrEmpty(entity.SheetId) ? "effectiveConfig.DefaultSheetId" : $"\"{entity.SheetId}\"")};");
 
         // Calculate the proper range for appending data, respecting StartRow
         var appendStartRow = entity.HasHeader ? entity.StartRow + 1 : entity.StartRow;
@@ -400,11 +444,14 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
         sb.AppendLine("    }");
         sb.AppendLine();
 
-        // UpdateAsync method with real implementation
+        // UpdateAsync method with configuration function
         sb.AppendLine(
-            $"    private Task<{entity.ClassName}> UpdateAsync{entity.ClassName}Internal({entity.ClassName} entity, CancellationToken cancellationToken = default)");
+            $"    private Task<{entity.ClassName}> UpdateAsync{entity.ClassName}Internal({entity.ClassName} entity, Func<GoogleSheetsConfiguration, GoogleSheetsConfiguration> configurationFunc, CancellationToken cancellationToken = default)");
         sb.AppendLine("    {");
         sb.AppendLine("        cancellationToken.ThrowIfCancellationRequested();");
+        sb.AppendLine();
+        sb.AppendLine("        // Apply the configuration function to get the effective configuration");
+        sb.AppendLine("        var effectiveConfig = configurationFunc(_configuration);");
         sb.AppendLine();
 
         var propertyColumnInfos = entity.Properties.Select(p => new
@@ -466,7 +513,7 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
             sb.AppendLine();
 
             sb.AppendLine(
-                $"        var sheetId = {(string.IsNullOrEmpty(entity.SheetId) ? "_configuration.DefaultSheetId" : $"\"{entity.SheetId}\"")};");
+                $"        var sheetId = {(string.IsNullOrEmpty(entity.SheetId) ? "effectiveConfig.DefaultSheetId" : $"\"{entity.SheetId}\"")};");
             sb.AppendLine($"        var sheetName = \"{entity.SheetName}\";");
             sb.AppendLine($"        var keyValue = entity.{keyProperty.Name};");
             sb.AppendLine($"        var keyPropertyName = \"{keyProperty.Name}\";");
@@ -499,11 +546,14 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
         sb.AppendLine("    }");
         sb.AppendLine();
 
-        // DeleteAsync method
+        // DeleteAsync method with configuration function
         sb.AppendLine(
-            $"    private Task DeleteAsync{entity.ClassName}Internal({entity.ClassName} entity, CancellationToken cancellationToken = default)");
+            $"    private Task DeleteAsync{entity.ClassName}Internal({entity.ClassName} entity, Func<GoogleSheetsConfiguration, GoogleSheetsConfiguration> configurationFunc, CancellationToken cancellationToken = default)");
         sb.AppendLine("    {");
         sb.AppendLine("        cancellationToken.ThrowIfCancellationRequested();");
+        sb.AppendLine();
+        sb.AppendLine("        // Apply the configuration function to get the effective configuration");
+        sb.AppendLine("        var effectiveConfig = configurationFunc(_configuration);");
         sb.AppendLine();
 
         if (keyProperty != null)
@@ -532,7 +582,7 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
             sb.AppendLine();
 
             sb.AppendLine(
-                $"        var sheetId = {(string.IsNullOrEmpty(entity.SheetId) ? "_configuration.DefaultSheetId" : $"\"{entity.SheetId}\"")};");
+                $"        var sheetId = {(string.IsNullOrEmpty(entity.SheetId) ? "effectiveConfig.DefaultSheetId" : $"\"{entity.SheetId}\"")};");
             sb.AppendLine($"        var sheetName = \"{entity.SheetName}\";");
             sb.AppendLine($"        var keyValue = entity.{keyProperty.Name};");
             sb.AppendLine($"        var keyPropertyName = \"{keyProperty.Name}\";");
@@ -649,7 +699,7 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
         return result;
     }
 
-    // Generate entity extensions with CancellationToken support
+    // Generate entity extensions with support for configuration function
     private static string GenerateEntityExtensions(EntityClassInfo entity)
     {
         var sb = new StringBuilder();
@@ -669,7 +719,7 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
         sb.AppendLine($"public static class {entity.ClassName}Extensions");
         sb.AppendLine("{");
 
-        // GetAsync extension with CancellationToken
+        // GetAsync extension without configuration function
         sb.AppendLine(
             $"    public static async Task<IEnumerable<{entity.ClassName}>> Get{entity.ClassName}Async(this IGoogleSheetsContext context, CancellationToken cancellationToken = default)");
         sb.AppendLine("    {");
@@ -677,17 +727,37 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
         sb.AppendLine("    }");
         sb.AppendLine();
 
+        // GetAsync extension with configuration function
+        sb.AppendLine(
+            $"    public static async Task<IEnumerable<{entity.ClassName}>> Get{entity.ClassName}Async(this IGoogleSheetsContext context, Func<GoogleSheetsConfiguration, GoogleSheetsConfiguration> configurationFunc, CancellationToken cancellationToken = default)");
+        sb.AppendLine("    {");
+        sb.AppendLine(
+            $"        return await context.GetAsync<{entity.ClassName}>(configurationFunc, cancellationToken);");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+
         var keyProperty = entity.Properties.FirstOrDefault(p => p.IsKey);
         if (keyProperty != null)
         {
+            // GetByKeyAsync extension without configuration function
             sb.AppendLine(
                 $"    public static async Task<{entity.ClassName}?> Get{entity.ClassName}ByKeyAsync(this IGoogleSheetsContext context, {keyProperty.Type} key, CancellationToken cancellationToken = default)");
             sb.AppendLine("    {");
             sb.AppendLine($"        return await context.GetByKeyAsync<{entity.ClassName}>(key, cancellationToken);");
             sb.AppendLine("    }");
             sb.AppendLine();
+
+            // GetByKeyAsync extension with configuration function
+            sb.AppendLine(
+                $"    public static async Task<{entity.ClassName}?> Get{entity.ClassName}ByKeyAsync(this IGoogleSheetsContext context, {keyProperty.Type} key, Func<GoogleSheetsConfiguration, GoogleSheetsConfiguration> configurationFunc, CancellationToken cancellationToken = default)");
+            sb.AppendLine("    {");
+            sb.AppendLine(
+                $"        return await context.GetByKeyAsync<{entity.ClassName}>(key, configurationFunc, cancellationToken);");
+            sb.AppendLine("    }");
+            sb.AppendLine();
         }
 
+        // AddAsync extension without configuration function
         sb.AppendLine(
             $"    public static async Task<{entity.ClassName}> Add{entity.ClassName}Async(this IGoogleSheetsContext context, {entity.ClassName} entity, CancellationToken cancellationToken = default)");
         sb.AppendLine("    {");
@@ -695,6 +765,15 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
         sb.AppendLine("    }");
         sb.AppendLine();
 
+        // AddAsync extension with configuration function
+        sb.AppendLine(
+            $"    public static async Task<{entity.ClassName}> Add{entity.ClassName}Async(this IGoogleSheetsContext context, {entity.ClassName} entity, Func<GoogleSheetsConfiguration, GoogleSheetsConfiguration> configurationFunc, CancellationToken cancellationToken = default)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        return await context.AddAsync(entity, configurationFunc, cancellationToken);");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+
+        // UpdateAsync extension without configuration function
         sb.AppendLine(
             $"    public static async Task<{entity.ClassName}> Update{entity.ClassName}Async(this IGoogleSheetsContext context, {entity.ClassName} entity, CancellationToken cancellationToken = default)");
         sb.AppendLine("    {");
@@ -702,10 +781,27 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
         sb.AppendLine("    }");
         sb.AppendLine();
 
+        // UpdateAsync extension with configuration function
+        sb.AppendLine(
+            $"    public static async Task<{entity.ClassName}> Update{entity.ClassName}Async(this IGoogleSheetsContext context, {entity.ClassName} entity, Func<GoogleSheetsConfiguration, GoogleSheetsConfiguration> configurationFunc, CancellationToken cancellationToken = default)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        return await context.UpdateAsync(entity, configurationFunc, cancellationToken);");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+
+        // DeleteAsync extension without configuration function
         sb.AppendLine(
             $"    public static async Task Delete{entity.ClassName}Async(this IGoogleSheetsContext context, {entity.ClassName} entity, CancellationToken cancellationToken = default)");
         sb.AppendLine("    {");
         sb.AppendLine("        await context.DeleteAsync(entity, cancellationToken);");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+
+        // DeleteAsync extension with configuration function
+        sb.AppendLine(
+            $"    public static async Task Delete{entity.ClassName}Async(this IGoogleSheetsContext context, {entity.ClassName} entity, Func<GoogleSheetsConfiguration, GoogleSheetsConfiguration> configurationFunc, CancellationToken cancellationToken = default)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        await context.DeleteAsync(entity, configurationFunc, cancellationToken);");
         sb.AppendLine("    }");
         sb.AppendLine("}");
 
@@ -724,7 +820,8 @@ public class GoogleSheetsIncrementalGenerator : IIncrementalGenerator
         sb.AppendLine("using System.Collections.Generic;");
         sb.AppendLine("using System.Linq;");
         sb.AppendLine("using System.Globalization;");
-        sb.AppendLine("using MyParadeManager.WebApi.Entities;");
+        sb.AppendLine("using MyParadeManager.WebApi.Entities.Shared;");
+        sb.AppendLine("using MyParadeManager.WebApi.Entities.Tenant;");
         sb.AppendLine("using MyParadeManager.WebApi.GoogleSheets.ValueConverter;");
         sb.AppendLine();
         sb.AppendLine("namespace MyParadeManager.WebApi.GoogleSheets;");

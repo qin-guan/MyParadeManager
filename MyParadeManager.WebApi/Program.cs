@@ -12,8 +12,6 @@ var builder = WebApplication.CreateSlimBuilder(args);
 
 builder.AddServiceDefaults();
 
-ValueConverterRegistry.RegisterConverter(new UserTeamRoleConverter());
-
 builder.Services.AddOptions<TelegramOptions>()
     .Bind(builder.Configuration.GetSection("Telegram"));
 
@@ -36,11 +34,7 @@ builder.Services.AddSingleton(sp =>
 builder.Services.AddSingleton(sp =>
 {
     var options = sp.GetRequiredService<IOptions<GoogleOptions>>();
-
-    return new GoogleSheetsConfiguration
-    {
-        DefaultSheetId = options.Value.SpreadsheetId
-    };
+    return new GoogleSheetsConfiguration(options.Value.SpreadsheetId);
 });
 
 builder.Services.AddScoped<IGoogleSheetsContext, GoogleSheetsContext>();

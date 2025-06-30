@@ -1,17 +1,18 @@
 using MyParadeManager.WebApi.Entities;
+using MyParadeManager.WebApi.Entities.Shared;
 using MyParadeManager.WebApi.GoogleSheets;
 using TelegramBotBase.Base;
 using TelegramBotBase.DependencyInjection;
 using TelegramBotBase.Form;
 
-namespace MyParadeManager.WebApi.Forms;
+namespace MyParadeManager.WebApi.Forms.Unit;
 
-public class TeamOverviewForm : AutoCleanForm
+public class UnitOverviewForm : AutoCleanForm
 {
     private readonly IServiceProvider _serviceProvider;
-    public Team? Team { get; set; }
+    public Entities.Shared.Unit? Team { get; set; }
 
-    public TeamOverviewForm(IServiceProvider serviceProvider)
+    public UnitOverviewForm(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
 
@@ -21,7 +22,7 @@ public class TeamOverviewForm : AutoCleanForm
             var ctx = scope.ServiceProvider.GetRequiredService<IGoogleSheetsContext>();
 
             var id = Guid.Parse(args.Args[0].ToString() ?? throw new InvalidOperationException());
-            Team = await ctx.GetTeamByKeyAsync(id);
+            Team = await ctx.GetUnitByKeyAsync(id);
         };
     }
 
@@ -63,7 +64,7 @@ public class TeamOverviewForm : AutoCleanForm
             case "back":
             {
                 message.Handled = true;
-                await this.NavigateTo<ListTeamsForm>();
+                await this.NavigateTo<ListUnitsForm>();
                 break;
             }
         }

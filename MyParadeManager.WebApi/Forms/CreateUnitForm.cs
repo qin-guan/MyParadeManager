@@ -1,5 +1,7 @@
 using Google.Apis.Sheets.v4;
 using MyParadeManager.WebApi.Entities;
+using MyParadeManager.WebApi.Entities.Shared;
+using MyParadeManager.WebApi.Forms.Unit;
 using MyParadeManager.WebApi.GoogleSheets;
 using TelegramBotBase.Base;
 using TelegramBotBase.DependencyInjection;
@@ -7,14 +9,14 @@ using TelegramBotBase.Form;
 
 namespace MyParadeManager.WebApi.Forms;
 
-public class CreateTeamForm : AutoCleanForm
+public class CreateUnitForm : AutoCleanForm
 {
     private readonly IServiceProvider _serviceProvider;
 
     public string? Name { get; set; }
     public string? SpreadsheetId { get; set; }
 
-    public CreateTeamForm(IServiceProvider serviceProvider)
+    public CreateUnitForm(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
@@ -85,28 +87,27 @@ public class CreateTeamForm : AutoCleanForm
 
                 var id = Guid.NewGuid();
                 
-                await ctx.AddTeamAsync(new Team
+                await ctx.AddUnitAsync(new Entities.Shared.Unit()
                 {
                     Id = id,
                     Name = Name,
-                    InviteCode = Guid.NewGuid().ToString(),
                     SpreadsheetId = SpreadsheetId
                 });
 
-                await ctx.AddUserTeamAsync(new UserTeam
-                {
-                    Id = Guid.NewGuid(),
-                    UserId = message.Message.Chat.Id,
-                    TeamId = id,
-                });
-
-                await ctx.SaveChangesAsync();
+                // await ctx.AddUserTeamAsync(new 
+                // {
+                //     Id = Guid.NewGuid(),
+                //     UserId = message.Message.Chat.Id,
+                //     TeamId = id,
+                // });
+                //
+                // await ctx.SaveChangesAsync();
 
                 await Device.Send("Your new team has been created!");
 
                 await message.ConfirmAction();
 
-                await this.NavigateTo<TeamOverviewForm>(id);
+                await this.NavigateTo<UnitOverviewForm>(id);
 
                 break;
             }
