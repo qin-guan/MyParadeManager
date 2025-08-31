@@ -1,9 +1,9 @@
 <Solution>
     <Folder Name="/Solution Items/">
-        <File Path="compose.yaml"/>
+        <File Path="compose.yaml" />
     </Folder>
-    <Project Path="MyParadeManager.AppHost/MyParadeManager.AppHost.csproj"/>
-    <Project Path="MyParadeManager.ServiceDefaults/MyParadeManager.ServiceDefaults.csproj"/>
-    <Project Path="MyParadeManager.SourceGenerator/MyParadeManager.SourceGenerator.csproj"/>
-    <Project Path="MyParadeManager.WebApi/MyParadeManager.WebApi.csproj"/>
+    <Project Path="MyParadeManager.AppHost/MyParadeManager.AppHost.csproj" />
+    <Project Path="MyParadeManager.ServiceDefaults/MyParadeManager.ServiceDefaults.csproj" />
+    <Project Path="MyParadeManager.SourceGenerator/MyParadeManager.SourceGenerator.csproj" />
+    <Project Path="MyParadeManager.WebApi/MyParadeManager.WebApi.csproj" />
 </Solution>

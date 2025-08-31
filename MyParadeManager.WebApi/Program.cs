@@ -10,6 +10,9 @@ using ZiggyCreatures.Caching.Fusion;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
+ValueConverterRegistry.RegisterConverter(new SubUnitParadeStateRecordValueConverter());
+ValueConverterRegistry.RegisterConverter(new TimeOnlyArrayValueConverter());
+
 builder.AddServiceDefaults();
 
 builder.Services.AddOptions<TelegramOptions>()

@@ -7,12 +7,12 @@ namespace MyParadeManager.WebApi.Entities.Shared;
 public class User
 {
     [Key]
-    [Column(Name = "TelegramChatId", ColumnLetter = "A")]
+    [Column(Name = "Id", ColumnLetter = "A")]
     public long Id { get; set; }
 
     [Column(Name = "Name", ColumnLetter = "B")]
     public string? Name { get; set; }
     
     [Column(Name = "Unit", ColumnLetter = "C")]
-    public Guid? Unit { get; set; }
+    public string? Unit { get; set; }
 }

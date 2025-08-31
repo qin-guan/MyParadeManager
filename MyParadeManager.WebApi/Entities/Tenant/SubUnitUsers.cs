@@ -3,8 +3,8 @@ using MyParadeManager.WebApi.GoogleSheets.Attributes;
 
 namespace MyParadeManager.WebApi.Entities.Tenant;
 
-[Entity(SheetName = "UserSubUnits")]
-public class UserSubUnit
+[Entity(SheetName = "SubUnitUsers")]
+public class SubUnitUsers
 {
     [Key]
     [Column(Name = "Id", ColumnLetter = "A")]

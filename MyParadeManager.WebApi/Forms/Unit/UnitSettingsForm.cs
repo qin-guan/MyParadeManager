@@ -1,5 +1,6 @@
 using MyParadeManager.WebApi.Entities;
 using MyParadeManager.WebApi.Entities.Shared;
+using MyParadeManager.WebApi.Forms.Unit.Settings;
 using MyParadeManager.WebApi.GoogleSheets;
 using TelegramBotBase.Base;
 using TelegramBotBase.DependencyInjection;
@@ -7,28 +8,24 @@ using TelegramBotBase.Form;
 
 namespace MyParadeManager.WebApi.Forms.Unit;
 
-public class UnitOverviewForm : AutoCleanForm
+public class UnitSettingsForm : AutoCleanForm
 {
     private readonly IServiceProvider _serviceProvider;
-    public Entities.Shared.Unit? Team { get; set; }
+    public Entities.Shared.Unit? Unit { get; set; }
 
-    public UnitOverviewForm(IServiceProvider serviceProvider)
+    public UnitSettingsForm(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
-
-        Init += async (_, args) =>
-        {
-            await using var scope = _serviceProvider.CreateAsyncScope();
-            var ctx = scope.ServiceProvider.GetRequiredService<IGoogleSheetsContext>();
-
-            var id = Guid.Parse(args.Args[0].ToString() ?? throw new InvalidOperationException());
-            Team = await ctx.GetUnitByKeyAsync(id);
-        };
     }
 
     public override async Task Load(MessageResult message)
     {
-        if (Team is null)
+        await using var scope = _serviceProvider.CreateAsyncScope();
+        var ctx = scope.ServiceProvider.GetRequiredService<IGoogleSheetsContext>();
+        var user = await ctx.GetUserByKeyAsync(message.Message.Chat.Id);
+
+        Unit = await ctx.GetUnitByKeyAsync(user.Unit);
+        if (Unit is null)
         {
             await Device.Send("Team not found, returning to home...");
             await this.NavigateTo<StartForm>();
@@ -40,10 +37,9 @@ public class UnitOverviewForm : AutoCleanForm
         var form = new ButtonForm();
 
         form.AddButtonRow(new ButtonBase("Back", new CallbackData("a", "back")));
-        form.AddButtonRow(new ButtonBase("Parade State", new CallbackData("a", "parade-state")));
-        form.AddButtonRow(new ButtonBase("Manage Personnel", new CallbackData("a", "personnel")));
+        form.AddButtonRow(new ButtonBase("Parade Timings", new CallbackData("a", "parade-timings")));
 
-        await Device.Send($"Team {Team.Name} {Team.Id}", form);
+        await Device.Send($"Unit Settings for {Unit.Name}", form);
     }
 
     public override async Task Action(MessageResult message)
@@ -64,7 +60,13 @@ public class UnitOverviewForm : AutoCleanForm
             case "back":
             {
                 message.Handled = true;
-                await this.NavigateTo<ListUnitsForm>();
+                await this.NavigateTo<StartForm>();
+                break;
+            }
+            case "parade-timings":
+            {
+                message.Handled = true;
+                await this.NavigateTo<ParadeTimingsForm>(Unit.Code);
                 break;
             }
         }

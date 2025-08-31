@@ -25,6 +25,7 @@ public class JoinUnitForm(IServiceProvider sp) : FormBase
         await using var scope = sp.CreateAsyncScope();
         var ctx = scope.ServiceProvider.GetRequiredService<IGoogleSheetsContext>();
 
+        User = (await ctx.GetUserByKeyAsync(message.Message.Chat.Id));
         if (User is null)
         {
             var name = message.MessageText.Trim();
@@ -33,46 +34,48 @@ public class JoinUnitForm(IServiceProvider sp) : FormBase
                 Id = message.Message.Chat.Id,
                 Name = name
             });
+            await ctx.SaveChangesAsync();
+            return;
         }
 
         if (Unit is null)
         {
-            var unitId = Guid.Parse(message.MessageText.Trim());
-            Unit = (await ctx.GetUnitAsync()).SingleOrDefault(u => u.Id == unitId);
+            Unit = (await ctx.GetUnitAsync()).SingleOrDefault(u => u.Code == message.MessageText.Trim());
             if (Unit is null)
             {
                 await Device.Send("Invalid invite code, try again!");
                 return;
             }
 
-            User.Unit = Unit.Id;
+            User.Unit = Unit.Code;
             await ctx.UpdateUserAsync(User);
+            await ctx.SaveChangesAsync();
+            return;
         }
 
         if (SubUnit is null)
         {
             var inviteCode = message.MessageText.Trim();
-            SubUnit =
-                (await ctx.GetSubUnitAsync(o => o with { DefaultSheetId = Unit.SpreadsheetId })).SingleOrDefault(su =>
-                    su.InviteCode == inviteCode);
+
+            SubUnit = (await ctx.GetSubUnitAsync(o => o with { DefaultSheetId = Unit.SpreadsheetId }))
+                .SingleOrDefault(su => su.InviteCode == inviteCode);
             if (SubUnit is null)
             {
                 await Device.Send("Invalid invite code");
                 return;
             }
 
-            await ctx.AddUserSubUnitAsync(
-                new UserSubUnit
+            await ctx.AddSubUnitUsersAsync(
+                new SubUnitUsers
                 {
                     Id = Guid.NewGuid(),
                     SubUnitId = SubUnit.Id,
-                    UserId = message.Message.Id
+                    UserId = message.Message.Chat.Id
                 },
                 o => o with { DefaultSheetId = Unit.SpreadsheetId }
             );
+            await ctx.SaveChangesAsync();
         }
-
-        await ctx.SaveChangesAsync();
 
         await Device.Send($"✅ Invite code accepted! You're all set.");
         await this.NavigateTo<StartForm>();
@@ -84,16 +87,21 @@ public class JoinUnitForm(IServiceProvider sp) : FormBase
 
         form.AddButtonRow("Back", new CallbackData("a", "back"));
 
+        if (User is null)
+        {
+            await Device.Send("What is your preferred name?");
+            return;
+        }
+
         if (Unit is null)
         {
-            await Device.Send("Enter your unit code.");
+            await Device.Send("What is your unit code?");
             return;
         }
 
         if (SubUnit is null)
         {
-            await Device.Send($"Enter your invite code to join a team:", form);
-            return;
+            await Device.Send($"What is your teams invite code?", form);
         }
     }
 
